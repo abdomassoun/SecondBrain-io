@@ -1,0 +1,64 @@
+app
+├── Application
+│   ├── Shared
+│   └── Users
+│       ├── Commands
+│       │   └── LoginUserCommand.php
+│       ├── DTOs
+│       │   └── UserDTO.php
+│       ├── Handlers
+│       │   └── LoginUserHandler.php
+│       ├── Queries
+│       ├── Rules
+│       └── Services
+│           └── AuthService.php
+├── Domain
+│   ├── Shared
+│   │   └── Entity.php
+│   └── Users
+│       ├── Entities
+│       │   └── User.php
+│       ├── Events
+│       ├── Policies
+│       ├── Repositories
+│       │   └── UserRepositoryInterface.php
+│       ├── Rules
+│       ├── Services
+│       └── ValueObjects
+│           └── Email.php
+├── Infrastructure
+│   ├── Broadcasting
+│   ├── MultiTenancy
+│   │   ├── Middleware
+│   │   └── TenantScope
+│   ├── Notifications
+│   ├── PDF
+│   ├── Persistence
+│   │   ├── Eloquent
+│   │   │   ├── Models
+│   │   │   │   └── User.php
+│   │   │   ├── Repositories
+│   │   │   │   └── UserRepository.php
+│   │   │   └── Traits
+│   │   └── QueryBuilders
+│   ├── Providers
+│   └── Storage
+├── Presentation
+│   ├── CLI
+│   └── Http
+│       ├── Controllers
+│       │   ├── API
+│       │   │   └── V1
+│       │   │       ├── AuthController.php
+│       │   │       └── UserBookingController.php
+│       │   └── Controller.php
+│       ├── Requests
+│       │   └── API
+│       │       └── V1
+│       └── Resources
+│           └── API
+│               └── V1
+├── Providers
+│   ├── AppServiceProvider.php
+│   └── RepositoryServiceProvider.php
+└── Support

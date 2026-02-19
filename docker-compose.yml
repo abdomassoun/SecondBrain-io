@@ -1,0 +1,64 @@
+services:
+
+  database:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    volumes:
+      - "./backend/docker/database/:/docker-entrypoint-initdb.d/"
+      - pgdata:/var/lib/postgresql/data
+
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: "backend-app"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  application:
+    build:
+      context: .
+      dockerfile: ./backend/docker/Dockerfile
+      target: app-dev
+      args:
+        ENVIRONMENT: development
+        GITHUB_AUTH_KEY: ${GITHUB_AUTH_KEY}
+    volumes:
+      - ./backend:/backend-app/backend
+      - /backend-app/backend/vendor
+    environment:
+      ENVIRONMENT: development
+      DATABASE_URL: "postgres://postgres:postgres@database:5432/backend-app"
+      QUEUE_CONNECTION: redis
+      CACHE_DRIVER: redis
+      CACHE_PATH: /backend-app/backend/storage/framework/cache
+      CACHE_URL: tcp://cache
+      REDIS_URL: tcp://cache
+      SESSION_DOMAIN: localhost
+      BROADCAST_DRIVER: socketcluster
+      MAIL_FROM_NAME: backend-app
+      APP_NAME: backend-app
+      LOG_CHANNEL: daily
+      MODEL_CACHE_ENABLED: 'true'
+      RESPONSE_CACHE_ENABLED: 'true'
+      RESPONSE_CACHE_DRIVER: redis
+      REGISTRY_PREINSTALLED_EXTENSIONS: 'true'
+      OSRM_HOST: https://router.project-osrm.org
+      PHP_MEMORY_LIMIT: 1024M
+    depends_on:
+      - database
+
+  httpd:
+    build:
+      context: .
+      dockerfile: backend/docker/httpd/Dockerfile
+    ports:
+      - "8000:80"
+    depends_on:
+      - application
+
+volumes:
+  pgdata:

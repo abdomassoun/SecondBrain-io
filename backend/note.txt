@@ -1,0 +1,26 @@
+// for test entire layer 
+php artisan test --testsuite=Domain
+php artisan test --testsuite=Application
+php artisan test --testsuite=Presentation 
+// also it can be php artisan test --testsuite=Application,Domain
+
+// for test one module 
+php artisan test --filter Products --testsuite=Application
+php artisan test --filter <<module_plural_name>> --testsuite=Application
+
+// create a ci class based on this 
+
+
+# Typical Implementation Steps:
+
+Frontend requests a Vimeo upload URL from Laravel backend.
+
+Backend calls Vimeo API (POST /me/videos) to get an upload link or ticket.
+
+Backend returns this URL to frontend.
+
+Frontend uploads the video directly to Vimeo.
+
+Frontend notifies Laravel backend with video ID and metadata after upload completes.
+
+Backend stores this info in your DB.

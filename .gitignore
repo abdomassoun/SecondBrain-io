@@ -1,0 +1,7 @@
+/.fleet
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+/backend-app.postman_collection.json

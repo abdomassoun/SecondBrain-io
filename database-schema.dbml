@@ -1,0 +1,52 @@
+// File Storage Service Database Schema
+
+Table users {
+  id bigint [pk, increment]
+  uuid varchar(36) [unique, not null, note: 'UUID for public reference']
+  email varchar(255) [unique, not null]
+  password varchar(255) [not null, note: 'Hashed password for JWT authentication']
+  created_at timestamp
+  updated_at timestamp
+  
+  indexes {
+    email
+  }
+}
+
+Table files {
+  id bigint [pk, increment]
+  name varchar(255) [not null, note: 'Stored filename']
+  original_name varchar(255) [not null, note: 'Original filename from upload']
+  size bigint [not null, note: 'File size in bytes']
+  mime_type varchar(100) [null, note: 'File MIME type for type validation']
+  extension varchar(20) [null, note: 'File extension']
+  path varchar(500) [not null, note: 'Storage path or file location']
+  owner_uuid varchar(36) [ref: > users.uuid, not null, note: 'Reference to user UUID for ownership'] 
+  upload_date timestamp [not null]
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp [null, note: 'Soft delete support']
+  
+  indexes {
+    owner_uuid
+    upload_date
+    mime_type
+  }
+}
+
+Table file_activity_logs {
+  id bigint [pk, increment]
+  file_id bigint [ref: > files.id, not null]
+  user_id bigint [ref: > users.id, not null]
+  action varchar(50) [not null, note: 'upload, download, delete']
+  ip_address varchar(45) [null]
+  user_agent varchar(500) [null]
+  created_at timestamp
+  
+  indexes {
+    file_id
+    user_id
+    action
+    created_at
+  }
+}
