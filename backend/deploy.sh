@@ -3,6 +3,15 @@
 # Exit the script as soon as a command fails
 set -e
 
+# Copy environment file if it doesn't exist
+cp .env.example .env
+
+# Generate application key
+php artisan key:generate
+
+# Generate JWT secret
+php artisan jwt:secret
+
 # Create mysql databases if none exists
 # php artisan mysql:createdb
 
