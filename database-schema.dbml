@@ -1,4 +1,25 @@
-// File Storage Service Database Schema
+//////////////////////////////////////////////////////
+// ⚙️  DATABASE SCHEMA PURPOSE
+//////////////////////////////////////////////////////
+
+/*
+This file has two main roles:
+
+1) Structure Definition
+It defines the database tables, fields, and relationships.
+It helps with fast modeling and gives AI a clear reference
+to assist in generating modules, migrations, and future updates.
+
+2) Documentation Layer
+It serves as clean documentation for the database design.
+It provides a clear and organized view of how entities relate,
+making collaboration easier and development more efficient.
+
+In short:
+This file is both the architectural blueprint and
+the single source of truth for the data model.
+*/
+//////////////////////////////////////////////////////
 
 Table users {
   id bigint [pk, increment]
