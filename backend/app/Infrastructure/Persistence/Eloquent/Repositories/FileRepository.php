@@ -57,6 +57,19 @@ class FileRepository implements FileRepositoryInterface
         return $file->toDomainEntity();
     }
 
+    public function findByOriginalNameAndOwner(string $originalName, string $ownerUuid): ?FileEntity
+    {
+        $file = File::where('original_name', $originalName)
+            ->where('owner_uuid', $ownerUuid)
+            ->first();
+
+        if (!$file) {
+            return null;
+        }
+
+        return $file->toDomainEntity();
+    }
+
     public function findByOwner(string $ownerUuid, int $limit = 15, int $offset = 0): array
     {
         return File::where('owner_uuid', $ownerUuid)

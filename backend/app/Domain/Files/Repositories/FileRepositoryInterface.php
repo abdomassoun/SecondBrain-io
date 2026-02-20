@@ -14,6 +14,8 @@ interface FileRepositoryInterface
 
     public function findByUuidAndOwner(string $uuid, string $ownerUuid): ?FileEntity;
 
+    public function findByOriginalNameAndOwner(string $originalName, string $ownerUuid): ?FileEntity;
+
     public function findByOwner(string $ownerUuid, int $limit = 15, int $offset = 0): array;
 
     public function save(FileEntity $file): void;

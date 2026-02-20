@@ -11,6 +11,7 @@ class FileResource extends JsonResource
         // $this is FileDTO
         return [
             'id' => $this->id,
+            'uuid' => $this->uuid,
             'name' => $this->name,
             'original_name' => $this->originalName,
             'size' => $this->size,

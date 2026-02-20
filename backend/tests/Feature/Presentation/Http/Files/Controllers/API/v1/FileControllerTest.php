@@ -62,6 +62,74 @@ test('user can upload a file successfully', function () {
     ]);
 });
 
+test('uploading file with same original_name returns existing file (idempotency)', function () {
+    // First upload
+    $file1 = UploadedFile::fake()->create('my-document.pdf', 1024, 'application/pdf');
+
+    $response1 = $this->withHeader('Authorization', 'Bearer ' . $this->token)
+        ->postJson('/api/v1/files/upload', [
+            'file' => $file1,
+        ]);
+
+    $response1->assertStatus(201);
+    $firstFileId = $response1->json('data.file.id');
+    $firstFileUuid = $response1->json('data.file.uuid');
+
+    // Second upload with same original_name but different content/size
+    $file2 = UploadedFile::fake()->create('my-document.pdf', 2048, 'application/pdf');
+
+    $response2 = $this->withHeader('Authorization', 'Bearer ' . $this->token)
+        ->postJson('/api/v1/files/upload', [
+            'file' => $file2,
+        ]);
+
+    // Should return 200 OK (not 201 Created) for idempotency
+    $response2->assertStatus(200)
+        ->assertJson([
+            'status' => true,
+            'message' => 'File already exists',
+        ]);
+
+    // Should return the same file (same ID and UUID)
+    expect($response2->json('data.file.id'))->toBe($firstFileId);
+    expect($response2->json('data.file.uuid'))->toBe($firstFileUuid);
+    expect($response2->json('data.file.original_name'))->toBe('my-document.pdf');
+
+    // Verify only one file exists in database
+    $fileCount = File::where('original_name', 'my-document.pdf')
+        ->where('owner_uuid', $this->user->uuid)
+        ->count();
+    expect($fileCount)->toBe(1);
+});
+
+test('different users can upload files with same original_name', function () {
+    // Create another user
+    $user2 = User::factory()->create([
+        'email' => 'user2@example.com',
+        'password' => bcrypt('password123'),
+    ]);
+    $token2 = auth()->login($user2);
+
+    // First user uploads a file
+    $file1 = UploadedFile::fake()->create('shared-name.pdf', 1024, 'application/pdf');
+    $response1 = $this->withHeader('Authorization', 'Bearer ' . $this->token)
+        ->postJson('/api/v1/files/upload', [
+            'file' => $file1,
+        ]);
+    $response1->assertStatus(201);
+
+    // Second user uploads a file with same name (should succeed)
+    $file2 = UploadedFile::fake()->create('shared-name.pdf', 1024, 'application/pdf');
+    $response2 = $this->withHeader('Authorization', 'Bearer ' . $token2)
+        ->postJson('/api/v1/files/upload', [
+            'file' => $file2,
+        ]);
+    $response2->assertStatus(201); // New file for different user
+
+    // Both files should exist
+    expect(File::where('original_name', 'shared-name.pdf')->count())->toBe(2);
+});
+
 test('user cannot upload file without authentication', function () {
     $file = UploadedFile::fake()->create('test.pdf', 100);
 
@@ -159,6 +227,81 @@ test('user can complete chunked upload after all chunks are uploaded', function 
     // Verify chunk record was deleted after completion
     $this->assertDatabaseMissing('file_chunks', [
         'upload_id' => $uploadId,
+    ]);
+});
+
+test('completing chunked upload with same original_name returns existing file (idempotency)', function () {
+    // First, complete a chunked upload
+    $uploadId1 = 'test-upload-1-' . uniqid();
+    $totalChunks = 2;
+
+    // Upload all chunks for first upload
+    for ($i = 0; $i < $totalChunks; $i++) {
+        $this->withHeader('Authorization', 'Bearer ' . $this->token)
+            ->postJson('/api/v1/files/upload-chunk', [
+                'upload_id' => $uploadId1,
+                'chunk_index' => $i,
+                'total_chunks' => $totalChunks,
+                'chunk_data' => base64_encode("First chunk $i data"),
+                'original_name' => 'video-file.mp4',
+                'total_size' => 5000000,
+                'mime_type' => 'video/mp4',
+            ]);
+    }
+
+    // Complete first upload
+    $response1 = $this->withHeader('Authorization', 'Bearer ' . $this->token)
+        ->postJson('/api/v1/files/complete-upload', [
+            'upload_id' => $uploadId1,
+        ]);
+
+    $response1->assertStatus(201);
+    $firstFileId = $response1->json('data.file.id');
+    $firstFileUuid = $response1->json('data.file.uuid');
+
+    // Now try to upload the same file again with different content
+    $uploadId2 = 'test-upload-2-' . uniqid();
+
+    // Upload all chunks for second upload (same original_name)
+    for ($i = 0; $i < $totalChunks; $i++) {
+        $this->withHeader('Authorization', 'Bearer ' . $this->token)
+            ->postJson('/api/v1/files/upload-chunk', [
+                'upload_id' => $uploadId2,
+                'chunk_index' => $i,
+                'total_chunks' => $totalChunks,
+                'chunk_data' => base64_encode("Second chunk $i data"),
+                'original_name' => 'video-file.mp4', // Same name
+                'total_size' => 6000000,
+                'mime_type' => 'video/mp4',
+            ]);
+    }
+
+    // Complete second upload - should return existing file
+    $response2 = $this->withHeader('Authorization', 'Bearer ' . $this->token)
+        ->postJson('/api/v1/files/complete-upload', [
+            'upload_id' => $uploadId2,
+        ]);
+
+    // Should return 200 OK (not 201 Created) for idempotency
+    $response2->assertStatus(200)
+        ->assertJson([
+            'status' => true,
+            'message' => 'File already exists',
+        ]);
+
+    // Should return the same file
+    expect($response2->json('data.file.id'))->toBe($firstFileId);
+    expect($response2->json('data.file.uuid'))->toBe($firstFileUuid);
+
+    // Verify only one file exists in database
+    $fileCount = File::where('original_name', 'video-file.mp4')
+        ->where('owner_uuid', $this->user->uuid)
+        ->count();
+    expect($fileCount)->toBe(1);
+
+    // Verify second chunk upload was cleaned up
+    $this->assertDatabaseMissing('file_chunks', [
+        'upload_id' => $uploadId2,
     ]);
 });
 

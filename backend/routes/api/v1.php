@@ -33,12 +33,12 @@ use App\Presentation\Http\Files\Controllers\API\V1\FileController;
     });
 
     Route::prefix('files')->middleware(['auth:api'])->group(function () {
-        // Simple file upload
-        Route::post('/upload', [FileController::class, 'upload']);
+        // Simple file upload (with idempotency check)
+        Route::post('/upload', [FileController::class, 'upload'])->middleware('idempotent.upload');
         
         // Chunked file upload
         Route::post('/upload-chunk', [FileController::class, 'uploadChunk']);
-        Route::post('/complete-upload', [FileController::class, 'completeChunkedUpload']);
+        Route::post('/complete-upload', [FileController::class, 'completeChunkedUpload'])->middleware('idempotent.upload');
         
         // File management
         Route::get('/', [FileController::class, 'index']);

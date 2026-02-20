@@ -13,6 +13,7 @@ test('delete file handler successfully deletes file', function () {
     
     $fileEntity = new FileEntity(
         id: 1,
+        uuid: 'file-uuid-123',
         name: 'test.pdf',
         originalName: 'Test Document.pdf',
         size: 1024,
@@ -24,16 +25,18 @@ test('delete file handler successfully deletes file', function () {
     );
 
     // Set expectations
-    $repository->shouldReceive('findByIdAndOwner')
+    $repository->shouldReceive('findByUuidAndOwner')
         ->once()
-        ->with(1, 'test-uuid-123')
+        ->with('file-uuid-123', 'test-uuid-123')
         ->andReturn($fileEntity);
 
     $activityLogService->shouldReceive('logActivity')
         ->once()
         ->with(
-            fileId: 1,
-            action: 'delete'
+            'file-uuid-123',  // fileUuid
+            'delete',         // action
+            null,             // userId
+            'test-uuid-123'   // ownerUuid
         );
 
     $repository->shouldReceive('delete')
@@ -45,7 +48,7 @@ test('delete file handler successfully deletes file', function () {
 
     // Create command
     $command = new DeleteFileCommand(
-        fileId: 1,
+        fileUuid: 'file-uuid-123',
         ownerUuid: 'test-uuid-123'
     );
 
@@ -60,15 +63,15 @@ test('delete file handler throws exception when file not found', function () {
     $activityLogService = Mockery::mock(FileActivityLogService::class);
 
     // File not found
-    $repository->shouldReceive('findByIdAndOwner')
+    $repository->shouldReceive('findByUuidAndOwner')
         ->once()
-        ->with(999, 'test-uuid-123')
+        ->with('file-uuid-999', 'test-uuid-123')
         ->andReturn(null);
 
     $handler = new DeleteFileHandler($repository, $activityLogService);
 
     $command = new DeleteFileCommand(
-        fileId: 999,
+        fileUuid: 'file-uuid-999',
         ownerUuid: 'test-uuid-123'
     );
 
@@ -81,15 +84,15 @@ test('delete file handler throws exception when user does not own file', functio
     $activityLogService = Mockery::mock(FileActivityLogService::class);
 
     // File belongs to different user
-    $repository->shouldReceive('findByIdAndOwner')
+    $repository->shouldReceive('findByUuidAndOwner')
         ->once()
-        ->with(1, 'wrong-uuid')
+        ->with('file-uuid-123', 'wrong-uuid')
         ->andReturn(null);
 
     $handler = new DeleteFileHandler($repository, $activityLogService);
 
     $command = new DeleteFileCommand(
-        fileId: 1,
+        fileUuid: 'file-uuid-123',
         ownerUuid: 'wrong-uuid'
     );
 

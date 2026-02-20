@@ -13,8 +13,15 @@ Table users {
   }
 }
 
+Table password_reset_tokens {
+  email varchar(255) [pk]
+  token varchar(255) [not null]
+  created_at timestamp [null]
+}
+
 Table files {
   id bigint [pk, increment]
+  uuid varchar(36) [unique, not null, note: 'Unique identifier for the file']
   name varchar(255) [not null, note: 'Stored filename']
   original_name varchar(255) [not null, note: 'Original filename from upload']
   size bigint [not null, note: 'File size in bytes']
@@ -22,7 +29,7 @@ Table files {
   extension varchar(20) [null, note: 'File extension']
   path varchar(500) [not null, note: 'Storage path or file location']
   owner_uuid varchar(36) [ref: > users.uuid, not null, note: 'Reference to user UUID for ownership'] 
-  upload_date timestamp [not null]
+  upload_date timestamp [not null, note: 'Upload completion date']
   created_at timestamp
   updated_at timestamp
   deleted_at timestamp [null, note: 'Soft delete support']
@@ -34,9 +41,30 @@ Table files {
   }
 }
 
+Table file_chunks {
+  id bigint [pk, increment]
+  upload_id varchar(255) [unique, not null, note: 'Unique identifier for chunked upload session']
+  original_name varchar(255) [not null, note: 'Original filename']
+  total_size bigint [not null, note: 'Total file size']
+  total_chunks int [not null, note: 'Total number of chunks']
+  uploaded_chunks int [not null, default: 0, note: 'Number of chunks uploaded']
+  mime_type varchar(100) [null]
+  owner_uuid varchar(36) [ref: > users.uuid, not null]
+  chunk_paths json [null, note: 'Paths to uploaded chunks']
+  expires_at timestamp [not null, note: 'Expiration time for incomplete uploads']
+  created_at timestamp
+  updated_at timestamp
+  
+  indexes {
+    upload_id
+    owner_uuid
+    expires_at
+  }
+}
+
 Table file_activity_logs {
   id bigint [pk, increment]
-  file_id bigint [ref: > files.id, not null]
+  file_uuid varchar(36) [ref: > files.uuid, not null]
   user_id bigint [ref: > users.id, not null]
   action varchar(50) [not null, note: 'upload, download, delete']
   ip_address varchar(45) [null]
@@ -44,7 +72,7 @@ Table file_activity_logs {
   created_at timestamp
   
   indexes {
-    file_id
+    file_uuid
     user_id
     action
     created_at

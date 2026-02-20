@@ -5,6 +5,7 @@ use App\Domain\Files\Entities\File;
 test('file entity can be created with valid data', function () {
     $file = new File(
         id: 1,
+        uuid: null,
         name: 'stored-file.pdf',
         originalName: 'My Document.pdf',
         size: 2048,
@@ -28,6 +29,7 @@ test('file entity can be created with valid data', function () {
 test('file entity correctly identifies ownership', function () {
     $file = new File(
         id: 1,
+        uuid: null,
         name: 'test.pdf',
         originalName: 'Test.pdf',
         size: 1024,
@@ -47,6 +49,7 @@ test('file entity snapshot returns correct data', function () {
     
     $file = new File(
         id: 1,
+        uuid: null,
         name: 'test.pdf',
         originalName: 'Test Document.pdf',
         size: 1024,

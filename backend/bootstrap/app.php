@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'auth' => \App\Presentation\Http\Middleware\Authenticate::class,
+            'idempotent.upload' => \App\Presentation\Http\Middleware\FileUploadIdempotency::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

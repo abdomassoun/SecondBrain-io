@@ -37,9 +37,8 @@ trait HasUuid
 
     public static function generateUuid($column = 'uuid')
     {
-        $model  = new static();
         $uuid   = (string) Str::uuid();
-        $exists = $model
+        $exists = static::query()
             ->where($column, $uuid)
             // ->withTrashed()
             ->exists();

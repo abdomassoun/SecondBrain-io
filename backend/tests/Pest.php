@@ -10,15 +10,15 @@ use Tests\TestCase;
 |
 | Apply Laravel testing traits to the appropriate layers:
 | - Domain: pure, no Laravel helpers
-| - Application & Presentation: use RefreshDatabase for DB tests
-|
+| - Application & Presentation: use RefreshDatabase for DB tests|
 */
 
-// Apply RefreshDatabase for Application & Presentation layers
-uses(RefreshDatabase::class)->in('Application', 'Presentation');
+// Application layer tests (Unit tests that need DB)
+uses(RefreshDatabase::class)->in('Application');
+
+// Feature tests use both TestCase and RefreshDatabase  
+uses(TestCase::class, RefreshDatabase::class)->in('Feature');
 
 // Domain tests remain framework-free
-
-pest()->extend(TestCase::class)->in('Feature');
 
 
