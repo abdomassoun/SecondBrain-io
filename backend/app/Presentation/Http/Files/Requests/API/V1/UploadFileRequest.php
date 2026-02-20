@@ -17,7 +17,7 @@ class UploadFileRequest extends FormRequest
             'file' => [
                 'required',
                 'file',
-                'max:102400', // 100MB max
+                'max:4096', // 4MB max
             ],
         ];
     }
@@ -27,7 +27,7 @@ class UploadFileRequest extends FormRequest
         return [
             'file.required' => 'File is required.',
             'file.file' => 'The uploaded file is not valid.',
-            'file.max' => 'File size must not exceed 100MB.',
+            'file.max' => 'File size must not exceed 4MB.',
         ];
     }
 }

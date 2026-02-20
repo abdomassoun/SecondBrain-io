@@ -16,11 +16,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::updateOrCreate(
-            ['email' => 'admin@test.com'],
-            [
+        $user = User::where('email', 'admin@test.com')->first();
+        
+        if ($user) {
+            $user->update(['password' => Hash::make('password')]);
+        } else {
+            User::create([
+                'email' => 'admin@test.com',
                 'password' => Hash::make('password'),
-            ]
-        );
+                'uuid' => '' . (string) \Illuminate\Support\Str::uuid()
+            ]);
+        }
     }
 }

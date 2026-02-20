@@ -12,6 +12,7 @@ class User extends Authenticatable implements JWTSubject
     use HasFactory, HasUuid;
 
     protected $fillable = [
+        'uuid',
         'email',
         'password',
     ];
