@@ -9,14 +9,14 @@ A robust, enterprise-grade file storage service built with Laravel following Dom
 - [Requirements](#-requirements)
 - [Installation](#-installation)
 - [Configuration](#-configuration)
-- [API Documentation](#-api-documentation)
 - [Authentication](#-authentication)
 - [Access Control](#-access-control)
+- [Postman Collection](#-postman-collection)
 - [File Upload Methods](#-file-upload-methods)
 - [Testing](#-testing)
 - [Database Schema](#-database-schema)
-- [Security Features](#-security-features)
-- [Additional Features](#-additional-features)
+- [Development Flow](#-development-flow)
+- [Note](#-note)
 
 ## ✨ Features
 
@@ -161,6 +161,17 @@ The system implements strict ownership-based access control:
 - File ownership is tracked via `owner_uuid` field
 - Authorization checks are performed at the service layer
 
+## 📮 Postman Collection
+
+A complete Postman collection is included for testing all API endpoints:
+
+**Import the collection:**
+```bash
+backend.postman_collection.json
+```
+
+**Environment Variables:**
+- Set `{{base_url}}` to `http://localhost:8000/api/v1`
 
 ## 📤 File Upload Methods
 
