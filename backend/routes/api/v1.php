@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Presentation\Http\Users\Controllers\API\V1\UserController;
 use App\Presentation\Http\Users\Controllers\API\V1\AuthController;
+use App\Presentation\Http\Files\Controllers\API\V1\FileController;
 
     Route::prefix('auth')->middleware([
         'throttle:auth',
@@ -29,4 +30,23 @@ use App\Presentation\Http\Users\Controllers\API\V1\AuthController;
         Route::get('/', [UserController::class, 'index']);
         Route::get('/{uuid}', [UserController::class, 'show']);
         Route::delete('/{uuid}', [UserController::class, 'delete']);
+    });
+
+    Route::prefix('files')->middleware(['auth:api'])->group(function () {
+        // Simple file upload
+        Route::post('/upload', [FileController::class, 'upload']);
+        
+        // Chunked file upload
+        Route::post('/upload-chunk', [FileController::class, 'uploadChunk']);
+        Route::post('/complete-upload', [FileController::class, 'completeChunkedUpload']);
+        
+        // File management
+        Route::get('/', [FileController::class, 'index']);
+        Route::get('/my-files', [FileController::class, 'myFiles']);
+        Route::get('/{uuid}', [FileController::class, 'show']);
+        Route::get('/{uuid}/download', [FileController::class, 'download']);
+        Route::delete('/{uuid}', [FileController::class, 'destroy']);
+        
+        // Activity logs
+        Route::get('/{uuid}/activity-logs', [FileController::class, 'activityLogs']);
     });

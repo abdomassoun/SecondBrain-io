@@ -6,11 +6,11 @@ use Illuminate\Support\Str;
 
 abstract class Entity
 {
-    public ?string $id;
+    public ?int $id;
 
-    public function __construct(?string $id = null)
+    public function __construct(?int $id = null)
     {
-        $this->id = $id ?? (string) Str::uuid();
+        $this->id = $id;
     }
 
     public function __get(string $property)
@@ -18,7 +18,7 @@ abstract class Entity
         return $this->$property;
     }
 
-    public function getId(): ?string
+    public function getId(): ?int
     {
         return $this->id;
     }

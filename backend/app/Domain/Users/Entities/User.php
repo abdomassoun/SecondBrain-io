@@ -7,7 +7,7 @@ use App\Domain\Shared\Entity;
 final class User extends Entity
 {
     public function __construct(
-        public ?string $id,
+        public ?int $id,
         public ?string $uuid,
         private string $email,
         private string $password,
@@ -16,11 +16,6 @@ final class User extends Entity
     public function __get($property)
     {
         return $this->$property;
-    }
-
-    public function getId(): ?string
-    {
-        return $this->id;
     }
 
     public function getEmail(): string
